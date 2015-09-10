@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Script to iterate through video outputs and rotates each according to specified pattern.
+
+# The rotation pattern, if we've been passed it.
+rotationpattern=$1;
+
+# Else, use the provided default
+if [ -z "$rotationpattern" ]; then
+  rotationpattern="<%= scope.lookupvar('rotation') -%>"
+fi;
+rotations=( $rotationpattern )
+
+# Check rotationpattern has at least one parameter.
+rotlen=${#rotations[@]}
+if [[ $rotlen -eq 0 ]]; then
+  echo "Error: rotationpattern parameter is empty. Exiting."
+  exit 1;
+fi 
+
+# Check all rotationpattern parameters are valid.
+acceptable="^(normal|left|right|inverted)$"
+for action in "${rotations[@]}"; do
+  if ! [[ $action =~ $acceptable ]]; then
+    echo "Error: \"${rotationpattern}\" is not valid for the rotationpattern parameter. Issue at \"${action}\". Exiting."
+    exit 1;
+  fi
+done
+
+# Get a list of all video outputs.
+declare -a VOUTS
+VOUTS=$(xrandr|awk 'BEGIN {} /^\S.* connected/{printf("%s ", $1)} END{}')
+VOUTS=( $VOUTS )
+
+case "$rotationpattern" in
+  normal)
+    # Rotate every monitor to the standard landscape position
+    for VOUT in "${VOUTS[@]}"; do
+      xrandr --output $VOUT --rotate normal
+    done
+    ;;
+  left)
+    # Rotate every monitor 90deg counterclockwise from the landscape position
+    for VOUT in "${VOUTS[@]}"; do
+      xrandr --output $VOUT --rotate left
+    done
+    ;;
+  right)
+    # Rotate every monitor 90deg clockwise from the landscape position
+    for VOUT in "${VOUTS[@]}"; do
+      xrandr --output $VOUT --rotate right
+    done
+    ;;
+  inverted)
+    # Rotate every monitor 180deg from the landscape position
+    for VOUT in "${VOUTS[@]}"; do
+      xrandr --output $VOUT --rotate inverted
+    done
+    ;;
+  *)
+    # Rotate every monitor according to a specified rotation pattern, looping back as necessary.
+    # Eg, if case is 'leftright', then rotate left then right then left, etc
+
+    voutlen=${#VOUTS[@]}
+    for (( i=0; i<${voutlen}; i++ )); do
+      # Loop back to the start of the rotation pattern if we have more screens than the length of the pattern
+      rotation=${rotations[$((i%$rotlen))]}
+      # Rotate the monitors
+      xrandr --output ${VOUTS[i]} --rotate $rotation
+    done
+    ;;
+esac
+
+exit 0;

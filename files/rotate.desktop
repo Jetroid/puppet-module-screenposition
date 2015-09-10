@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=AutorotateMonitors
+Terminal=false
+Exec=/usr/local/bin/rotate-monitors
+Type=Application
+Icon=/path/icon.png
+Categories=Utility;
