@@ -1,37 +1,77 @@
+<%# Script to use the output of xrandr -q --verbose to generate a monitors.xml file. -%>
+<%- rotations = rotationpattern.split -%>
+<%- number_of_rotations = rotations.length -%>
+<%- outputs = [] -%>
+<%- number_of_outputs = -1 -%>
+<%# Break the xrandr output into chunks for each output. -%>
+<%- xrandr_output.each_line do |line| -%>
+<%- if line.include? "connected" -%>
+<%- outputs << [line] -%>
+<%- number_of_outputs += 1 -%>
+<%- else -%>
+<%- outputs[number_of_outputs] << line unless number_of_outputs == -1 -%>
+<%- end -%>
+<%- end -%>
 <monitors version="1">
   <configuration>
       <clone>no</clone>
-
-      <output name="DVI-I-1">
-          <vendor>IVM</vendor>
-          <product>0x561f</product>
-          <serial>0x00000bbf</serial>
-          <width>1680</width>
-          <height>1050</height>
+<%- for output in 0..number_of_outputs -%>
+<%- video_output_lines = outputs[output] -%>
+      <output name="<%= video_output_lines[0].split[0] %>">
+<%- if video_output_lines[0].split[1] == "connected" -%>
+<%# Match the EDID. We get the vendor, product and serial from this. -%>
+<%- edid = "" -%>
+<%- video_output_lines.each do |line| -%>
+<%# Match any line which looks like an edid line and append it -%>
+<%- if line.match(/[a-fA-F0-9]{32}/) -%>
+<%- edid << line.strip -%>
+<%- end -%>
+<%- end -%>
+<%# Break the EDID into bytes. Just get the first 15 as those are the only ones we care about. -%>
+<%- byte = [] -%>
+<%- (0..15).each do |i| -%>
+<%- byte << edid[2*i..2*i+1] -%>
+<%- end -%>
+<%# Once we have the bytes, it is trivial to get the product and serial number. As they are little endian they need reversing. -%>
+<%- product = byte[10..11].reverse!.reduce(:+) -%>
+<%- serial = byte[12..15].reverse!.reduce(:+) -%>
+<%# We now want to get the bytes for vendor (in hex) and convert them to a 16 bit string. -%>
+<%- vendorbits = sprintf("%.16b", byte[8..9].reduce(:+).to_i(16)) -%>
+<%- vendorchars= [] -%>
+<%# Break the bits into chunks of 5 (ignoring the leftmost bit), prefix with '010' and convert to char. -%>
+<%- (0..2).each do |i| -%>
+<%- vendorchars[i] = "010" + vendorbits[1+i*5..5+i*5] -%>
+<%- vendorchars[i] = vendorchars[i].to_i(2).chr -%>
+<%- end -%>
+<%- vendor = vendorchars[0..2].reduce(:+) -%>
+<%# Identify if this monitory is primary or not and extract the resolution and position details. -%>
+<%# The dimensions data is either the 4th or 3rd column on the first line for this screen depending on if it is primary or not (respectively). -%>
+<%- if video_output_lines[0].split[2] == "primary" -%>
+<%- primary = true -%>
+<%- dimensions = video_output_lines[0].split[3] -%>
+<%- else -%>
+<%- primary = false -%>
+<%- dimensions = video_output_lines[0].split[2] -%>
+<%- end -%>
+<%- width = dimensions.split("+")[0].split("x")[1] -%>
+<%- height = dimensions.split("+")[0].split("x")[0] -%>
+<%- x = dimensions.split("+")[1] -%>
+<%- y = dimensions.split("+")[2] -%>
+<%- rotation = rotations[output % number_of_rotations] -%>
+          <vendor><%= vendor %></vendor>
+          <product>0x<%= product %></product>
+          <serial>0x<%= serial %></serial>
+          <width><%= width %></width>
+          <height><%= height %></height>
           <rate>60</rate>
-          <x>0</x>
-          <y>0</y>
-          <rotation>left</rotation>
+          <x><%= x %></x>
+          <y><%= y %></y>
+          <rotation><%= rotation -%></rotation>
           <reflect_x>no</reflect_x>
           <reflect_y>no</reflect_y>
-          <primary>yes</primary>
+          <primary><%= primary %></primary>
+  <%- end -%>
       </output>
-      <output name="DVI-I-2">
-          <vendor>IVM</vendor>
-          <product>0x561f</product>
-          <serial>0x00000bc6</serial>
-          <width>1680</width>
-          <height>1050</height>
-          <rate>60</rate>
-          <x>1050</x>
-          <y>0</y>
-          <rotation>right</rotation>
-          <reflect_x>no</reflect_x>
-          <reflect_y>no</reflect_y>
-          <primary>no</primary>
-      </output>
-      <output name="HDMI-1">
-      </output>
+<%- end -%>
   </configuration>
 </monitors>
-
