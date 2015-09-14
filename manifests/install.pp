@@ -1,6 +1,6 @@
 class screenposition::install (
-  $ensure              = $screenposition::ensure,
-  $rotation            = $screenposition::rotation,
+  $ensure          = $screenposition::ensure,
+  $rotationpattern = $screenposition::rotationpattern,
 ) {
 
   package{'x11-xserver-utils':

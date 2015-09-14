@@ -4,7 +4,7 @@
 #
 class screenposition (
   $ensure              = $screenposition::params::ensure,
-  $rotation            = $screenposition::params::rotation,
+  $rotationpattern     = $screenposition::params::rotationpattern,
 ) inherits screenposition::params {
 
   validate_re($ensure, '^(present|absent)$',"${ensure} is not allowed for the 'ensure' parameter. Allowed values are 'present' and 'absent'.")

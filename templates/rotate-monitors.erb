@@ -7,7 +7,7 @@ rotationpattern=$1;
 
 # Else, use the provided default
 if [ -z "$rotationpattern" ]; then
-  rotationpattern="<%= scope.lookupvar('rotation') -%>"
+  rotationpattern="<%= scope.lookupvar('rotationpattern') -%>"
 fi;
 rotations=( $rotationpattern )
 

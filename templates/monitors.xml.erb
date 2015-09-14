@@ -1,10 +1,10 @@
 <%# Script to use the output of xrandr -q --verbose to generate a monitors.xml file. -%>
-<%- rotations = rotationpattern.split -%>
+<%- rotations = scope.lookupvar('rotationpattern').split -%>
 <%- number_of_rotations = rotations.length -%>
 <%- outputs = [] -%>
 <%- number_of_outputs = -1 -%>
 <%# Break the xrandr output into chunks for each output. -%>
-<%- xrandr_output.each_line do |line| -%>
+<%- scope.lookupvar('xrandr_output').each_line do |line| -%>
 <%- if line.include? "connected" -%>
 <%- outputs << [line] -%>
 <%- number_of_outputs += 1 -%>
