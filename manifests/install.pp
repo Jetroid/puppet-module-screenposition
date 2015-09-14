@@ -25,7 +25,7 @@ class screenposition::install (
   file{'/var/lib/lightdm/.config/monitors.xml':
     ensure  => $ensure,
     mode    => "0644",
-    content => template('screenposition/monitors.xml'),
+    content => template('screenposition/monitors.xml.erb'),
   }
 
 }
