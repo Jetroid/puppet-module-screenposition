@@ -21,13 +21,6 @@ class screenposition::install (
     source  => 'puppet:///modules/screenposition/rotate.desktop',
   }
 
-  # Script to retrieve the xrandr verbose output
-  file{'/usr/local/bin/xrandr-fact-script':
-    ensure  => $ensure,
-    mode    => "0755",
-    source  => 'puppet:///modules/screenposition/xrandr-fact-script',
-  } ->
-
   # Set the xml for the login greeter
   file{'/var/lib/lightdm/.config/monitors.xml':
     ensure  => $ensure,
