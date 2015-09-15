@@ -21,21 +21,6 @@ class screenposition::install (
     source  => 'puppet:///modules/screenposition/rotate.desktop',
   }
 
-  include sudo ->
-  
-  # Hack to allow root to run our factscript as lightdm without asking for a password
-  sudo::conf { 'screenrotatehack':
-    priority => 10,
-    content  => "root ALL=(lightdm) NOPASSWD: /usr/local/bin/xrandrfact.sh",
-  } ->
-
-  # The fact script to get xrandr info
-  file{'/usr/local/bin/xrandrfact.sh':
-    ensure  => $ensure,
-    mode    => "0755",
-    source  => 'puppet:///modules/screenposition/xrandrfact.sh',
-  } 
-
   # Set the xml for the login greeter
   file{'/var/lib/lightdm/.config/monitors.xml':
     ensure  => $ensure,
