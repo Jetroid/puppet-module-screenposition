@@ -3,6 +3,6 @@
 
     Facter.add('xrandr_output') do
       setcode do
-        Facter::Util::Resolution.exec('su -c "DISPLAY=:0 xrandr -q --verbose" -s /bin/sh lightdm')
+        Facter::Util::Resolution.exec('/usr/local/bin/xrandr-fact-script')
       end
     end

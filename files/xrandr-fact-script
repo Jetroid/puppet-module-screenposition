@@ -1,0 +1,25 @@
+#Change field separator to preserve whitespace
+IFS='@'
+#Make cache directory and file just in case;
+mkdir -p /var/lib/lightdm/.config/;
+touch /var/lib/lightdm/.config/xrandr-cache;
+#Try to get xrandr verbose output by asking lightdm (will work when nobody is logged in and the x greeter is shown.)
+XRANDR=$(su -c "DISPLAY=:0 xrandr -q --verbose" -s /bin/sh username)
+#Also get the latest cached version
+OLDXRANDR=$(cat /var/lib/lightdm/.config/xrandr-cache)
+# 00ffffffffffff00 should be found in the EDID in a correct output
+# If this attempt worked (ie: edid found), use that and update the cache
+# Else, check the cache is fine (edid found) and use that,
+# else fail, logging to /var/lib/lightdm/.config/xrandr-fact-fails and syslog
+if [[ $XRANDR =~ .*00ffffffffffff00 ]] ; then 
+  echo $XRANDR;
+  echo $XRANDR > /var/lib/lightdm/.config/xrandr-cache;
+  exit 0;
+elif [[ $OLDXRANDR =~ .*00ffffffffffff00 ]] ; then
+  echo $OLDXRANDR;
+  exit 0;
+else
+  date +"%d-%m-%Y %H:%M:%S Failed to retrieve XRANDR Verbose Output for Screen Rotation" >> /var/lib/lightdm/.config/xrandr-fact-fails
+  logger -t "XRANDR-Fact (Screen-Rotation-Puppet-Module)" Failed to retrieve xrandr verbose output!
+  exit 1;
+fi
