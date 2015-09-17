@@ -53,16 +53,16 @@
 <%- primary = false -%>
 <%- dimensions = video_output_lines[0].split[2] -%>
 <%- end -%>
-<%- width = dimensions.split("+")[0].split("x")[0] -%>
-<%- height = dimensions.split("+")[0].split("x")[1] -%>
+<%- dim1 = dimensions.split("+")[0].split("x")[0] -%>
+<%- dim2 = dimensions.split("+")[0].split("x")[1] -%>
 <%- x = dimensions.split("+")[1] -%>
 <%- y = dimensions.split("+")[2] -%>
 <%- rotation = rotations[output % number_of_rotations] -%>
           <vendor><%= vendor %></vendor>
           <product>0x<%= product %></product>
           <serial>0x<%= serial %></serial>
-          <width><%= width %></width>
-          <height><%= height %></height>
+          <width><%= dim1 > dim2 ? dim1 : dim2 %></width>
+          <height><%= dim1 < dim2 ? dim1 : dim2 %></height>
           <rate>60</rate>
           <x><%= x %></x>
           <y><%= y %></y>
