@@ -12,6 +12,7 @@
 <%- outputs[number_of_outputs] << line unless number_of_outputs == -1 -%>
 <%- end -%>
 <%- end -%>
+<%- connected_output_count = 0 -%>
 <monitors version="1">
   <configuration>
       <clone>no</clone>
@@ -57,7 +58,8 @@
 <%- dim2 = dimensions.split("+")[0].split("x")[1] -%>
 <%- x = dimensions.split("+")[1] -%>
 <%- y = dimensions.split("+")[2] -%>
-<%- rotation = rotations[output % number_of_rotations] -%>
+<%- rotation = rotations[connected_output_count % number_of_rotations] -%>
+<%- connected_output_count += 1 -%>
           <vendor><%= vendor %></vendor>
           <product>0x<%= product %></product>
           <serial>0x<%= serial %></serial>
